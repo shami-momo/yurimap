@@ -1,0 +1,29 @@
+# Node.js
+node_modules/
+npm-debug.log*
+package.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.py
+
+# Image converter input, output, and build files
+/image-converter
+requirements.txt
+
+# Local configuration
+.env
+.env.*
+!.env.example
+/tests
+
+# System files
+.DS_Store
+Thumbs.db
+dev-server.js

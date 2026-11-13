@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>Yuri*map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="app.css">
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script defer src="data/botan.js"></script>
+  <script defer src="data/machikado.js"></script>
+  <script defer src="data/supercub.js"></script>
+  <script defer src="data/assaultlily.js"></script>
+  <script defer src="data/yurucamp.js"></script>
+  <script defer src="data/mygo.js"></script>
+  <script defer src="data/avemujica.js"></script>
+  <script defer src="data/girlsbandcry.js"></script>
+  <script defer src="data/kaguya.js"></script>
+  <script defer src="data/hoshitele.js"></script>
+  <script defer src="data/aquatope.js"></script>
+  <script defer src="places.js"></script>
+  <script defer src="app.js"></script>
+</head>
+
+<body>
+  <main class="shell">
+    <header class="header">
+      <a class="brand" href="./">
+        <img src="images/sdchara.webp" alt="">
+        <span class="brand-copy">
+          <span><span class="brand-accent">Yuri*</span>map</span>
+          <span class="brand-subtitle">백합애니 성지순례 지도</span>
+        </span>
+      </a>
+    </header>
+
+    <section class="workspace" aria-label="성지순례 지도">
+      <aside class="sidebar">
+        <div class="view-tabs" role="tablist" aria-label="화면 선택">
+          <button id="view-explore-tab" class="view-tab active" type="button" role="tab" aria-selected="true" aria-controls="view-explore">장소별 찾기</button>
+          <button id="view-travel-tab" class="view-tab" type="button" role="tab" aria-selected="false" aria-controls="view-travel" tabindex="-1">경로 주변 성지</button>
+        </div>
+
+        <section id="view-explore" class="view-panel" role="tabpanel" aria-labelledby="view-explore-tab">
+          <div class="tabs" role="group" aria-label="탐색 방식">
+            <button class="tab active" data-mode="work" aria-pressed="true">작품별</button>
+            <button class="tab" data-mode="region" aria-pressed="false">지역별</button>
+          </div>
+
+          <label class="sr-only" for="filter">작품 또는 지역 선택</label>
+          <select id="filter"></select>
+
+          <div id="episode-filter-wrap" class="episode-filter" hidden>
+            <label class="sr-only" for="episode-filter">등장 화수 선택</label>
+            <select id="episode-filter"></select>
+          </div>
+
+          <form id="nearby-form" class="nearby-form">
+            <label for="nearby-query">주변 성지 검색</label>
+            <div class="nearby-fields">
+              <input id="nearby-query" type="search" placeholder="장소 또는 주소" required>
+              <div class="radius-field">
+                <label class="sr-only" for="nearby-radius">검색 반경 (km)</label>
+                <input id="nearby-radius" type="number" min="0.1" max="20000" step="any" value="10" required>
+                <span>km</span>
+              </div>
+              <button type="submit">검색</button>
+            </div>
+            <label id="nearby-choice-label" for="nearby-choice" hidden>검색 위치 선택</label>
+            <select id="nearby-choice" hidden></select>
+            <button id="nearby-clear" type="button" hidden>검색 초기화</button>
+            <p id="nearby-status" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section id="view-travel" class="view-panel" role="tabpanel" aria-labelledby="view-travel-tab" hidden>
+          <div id="travel-scroll">
+            <div class="travel-planner">
+              <h2>여행 경로 검색</h2>
+              <form id="travel-form">
+                <p class="travel-hint">방문할 장소를 순서대로 최대 8곳까지 검색해 선택하세요.</p>
+                <div id="travel-stops"></div>
+                <button id="travel-add-stop" type="button">장소 추가</button>
+                <div class="travel-options">
+                  <label for="travel-mode">이동 수단</label>
+                  <select id="travel-mode">
+                    <option value="pedestrian">도보</option>
+                    <option value="bicycle">자전거</option>
+                    <option value="auto">자동차</option>
+                  </select>
+                  <label for="travel-radius">경로 주변</label>
+                  <div class="radius-field">
+                    <input id="travel-radius" type="number" min="0.1" max="20" step="0.1" value="1" required>
+                    <span>km</span>
+                  </div>
+                </div>
+                <button class="travel-submit" type="submit">경로와 주변 성지 보기</button>
+                <button id="travel-clear-results" type="button" hidden>경로 지우기</button>
+                <p id="travel-status" class="travel-hint" role="status" aria-live="polite"></p>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <div class="list-heading">
+          <h2 id="list-title">장소</h2>
+          <span id="count"></span>
+        </div>
+        <p id="list-legend" class="list-legend" hidden>번호는 입력한 여행지 순서, 분홍색 핀은 경로 주변 성지입니다.</p>
+
+        <div class="place-list-wrap">
+          <div id="list" class="place-list"></div>
+        </div>
+        <p class="sidebar-note">애니메이션 분량만 넣었습니다. 모든 장소 사진의 저작권은 제작자에게 있습니다. 건의사항은 <a href="https://github.com/shami-momo/yurifinder/issues">여기로</a> 보내주세요.</p>
+      </aside>
+
+      <div class="map-wrap">
+        <div id="map" aria-label="장소 지도"></div>
+        <section id="detail" class="detail" aria-live="polite" hidden></section>
+      </div>
+    </section>
+
+  </main>
+
+  <noscript>지도를 보려면 자바스크립트를 활성화하세요.</noscript>
+</body>
+
+</html>
